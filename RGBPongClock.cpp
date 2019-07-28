@@ -27,7 +27,8 @@
 #include <iomanip>
 #include <thread>
 #include <random>
-#include <string>
+
+#include <iostream>
 
 using namespace std;
 using namespace rgb_matrix;
@@ -41,8 +42,9 @@ char *time_format = "%I:%M:%S";
 RGBMatrix *matrix;
 
 int random(int start, int end) {
-  std::default_random_engine generator;
-  std::uniform_int_distribution<int> distribution(start,end);
+  std::random_device rd;
+  std::default_random_engine generator (rd());
+  std::uniform_int_distribution<int> distribution(start,end-1);
   return distribution(generator);
 }
 
@@ -502,25 +504,9 @@ static int usage(const char *progname, RGBMatrix::Options &matrix_options, rgb_m
   fprintf(stderr, "Options:\n");
   rgb_matrix::PrintMatrixFlags(stderr, matrix_options, runtime_opt);
   fprintf(stderr,
-          "\t-x <xOrig>        : Starting X position of displayed time. Default: 1\n"
-          "\t-y <yOrig>        : Starting Y position of displayed time. Default: 2\n"
-          "\t-l <segLength>    : Length of each segment in the time display. Default: 4\n"
-          "\t-0                : Show leading zero in the hour.\n"
           "\t-t                : Use 24-hour clock.\n"
-          "\t-C <r,g,b>        : Color. Default 0,0,255\n"
           );
   return 1;
-}
-
-static bool parseColor(Color *c, const char *str) {
-  return sscanf(str, "%hhu,%hhu,%hhu", &c->r, &c->g, &c->b) == 3;
-}
-
-static int getDigit(string input, int pos)
-{
-  string individualNumber = input.substr(pos, 1);
-  int number = (individualNumber != " ") ? stoi(individualNumber) : -1;
-  return number;
 }
 
 int main(int argc, char *argv[]) {
@@ -531,43 +517,12 @@ int main(int argc, char *argv[]) {
     return usage(argv[0], matrix_options, runtime_opt);
   }
 
-  Color color = Color(0, 0, 255);
-  /*int xOrig = -4;
-  int yOrig = 1;
-  int segLength = 5;*/
-  /*int xOrig = -6;
-  int yOrig = 0;
-  int segLength = 6;*/
-  int xOrig = 1;
-  int yOrig = 2;
-  int segLength = 4;
-  bool leadingZero = false;
-
   int opt;
-  while ((opt = getopt(argc, argv, "x:y:l:0tC:")) != -1) {
+  while ((opt = getopt(argc, argv, "t")) != -1) {
     switch (opt) {
-      case 'x':
-        xOrig = atoi(optarg);
-        break;
-      case 'y':
-        yOrig = atoi(optarg);
-        break;
-      case 'l':
-        segLength = atoi(optarg);
-        break;
-      case '0':
-        leadingZero = true;
-        break;
       case 't':
         time_format = "%H:%M:%S";
         break;
-      case 'C':
-        if (!parseColor(&color, optarg)) {
-          fprintf(stderr, "Invalid color spec: %s\n", optarg);
-          return usage(argv[0], matrix_options, runtime_opt);
-        }
-      break;
-      break;
       default:
         return usage(argv[0], matrix_options, runtime_opt);
     }
