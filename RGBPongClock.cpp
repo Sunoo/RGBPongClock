@@ -38,8 +38,14 @@ using std::chrono::system_clock;
 #define BAT2_X 28
 
 char *time_format = "%I:%M:%S";
+bool animNet = true;
+Color paddleColor = Color(0, 0, 146);
+Color netColor = Color(0, 146, 0);
+Color scoreColor = Color(36, 36, 36);
+Color ballColor = Color(146, 0, 0);
   
 RGBMatrix *matrix;
+FrameCanvas *offscreen;
 
 int random(int start, int end) {
   std::random_device rd;
@@ -64,7 +70,7 @@ void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, Color color)
   {
     for (int16_t y_pos = y; y_pos < y + h; y_pos++)
     {
-      matrix->SetPixel(x_pos, y_pos, color.r, color.g, color.b);
+      offscreen->SetPixel(x_pos, y_pos, color.r, color.g, color.b);
     }
   }
 }
@@ -75,71 +81,71 @@ void vectorNumber(int n, int x, int y, Color color, float scale_x, float scale_y
 
 	switch (n){
 	case 0:
-		DrawLine(matrix, x ,y , x , y+(4*scale_y) , color);
-		DrawLine(matrix, x , y+(4*scale_y) , x+(2*scale_x) , y+(4*scale_y), color);
-		DrawLine(matrix, x+(2*scale_x) , y , x+(2*scale_x) , y+(4*scale_y) , color);
-		DrawLine(matrix, x ,y , x+(2*scale_x) , y , color);
+		DrawLine(offscreen, x ,y , x , y+(4*scale_y) , color);
+		DrawLine(offscreen, x , y+(4*scale_y) , x+(2*scale_x) , y+(4*scale_y), color);
+		DrawLine(offscreen, x+(2*scale_x) , y , x+(2*scale_x) , y+(4*scale_y) , color);
+		DrawLine(offscreen, x ,y , x+(2*scale_x) , y , color);
 		break; 
 	case 1: 
-		DrawLine(matrix,  x+(1*scale_x), y, x+(1*scale_x),y+(4*scale_y), color);  
-		DrawLine(matrix, x , y+4*scale_y , x+2*scale_x , y+4*scale_y,color);
-		DrawLine(matrix, x,y+scale_y, x+scale_x, y,color);
+		DrawLine(offscreen,  x+(1*scale_x), y, x+(1*scale_x),y+(4*scale_y), color);  
+		DrawLine(offscreen, x , y+4*scale_y , x+2*scale_x , y+4*scale_y,color);
+		DrawLine(offscreen, x,y+scale_y, x+scale_x, y,color);
 		break;
 	case 2:
-		DrawLine(matrix, x ,y , x+2*scale_x , y , color);
-		DrawLine(matrix, x+2*scale_x , y , x+2*scale_x , y+2*scale_y , color);
-		DrawLine(matrix, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
-		DrawLine(matrix, x , y+2*scale_y, x , y+4*scale_y,color);
-		DrawLine(matrix, x , y+4*scale_y , x+2*scale_x , y+4*scale_y,color);
+		DrawLine(offscreen, x ,y , x+2*scale_x , y , color);
+		DrawLine(offscreen, x+2*scale_x , y , x+2*scale_x , y+2*scale_y , color);
+		DrawLine(offscreen, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
+		DrawLine(offscreen, x , y+2*scale_y, x , y+4*scale_y,color);
+		DrawLine(offscreen, x , y+4*scale_y , x+2*scale_x , y+4*scale_y,color);
 		break; 
 	case 3:
-		DrawLine(matrix, x ,y , x+2*scale_x , y , color);
-		DrawLine(matrix, x+2*scale_x , y , x+2*scale_x , y+4*scale_y , color);
-		DrawLine(matrix, x+2*scale_x , y+2*scale_y , x+scale_x , y+2*scale_y, color);
-		DrawLine(matrix, x , y+4*scale_y , x+2*scale_x , y+4*scale_y,color);
+		DrawLine(offscreen, x ,y , x+2*scale_x , y , color);
+		DrawLine(offscreen, x+2*scale_x , y , x+2*scale_x , y+4*scale_y , color);
+		DrawLine(offscreen, x+2*scale_x , y+2*scale_y , x+scale_x , y+2*scale_y, color);
+		DrawLine(offscreen, x , y+4*scale_y , x+2*scale_x , y+4*scale_y,color);
 		break;
 	case 4:
-		DrawLine(matrix, x+2*scale_x , y , x+2*scale_x , y+4*scale_y , color);
-		DrawLine(matrix, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
-		DrawLine(matrix, x ,y , x , y+2*scale_y , color);
+		DrawLine(offscreen, x+2*scale_x , y , x+2*scale_x , y+4*scale_y , color);
+		DrawLine(offscreen, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
+		DrawLine(offscreen, x ,y , x , y+2*scale_y , color);
 		break;
 	case 5:
-		DrawLine(matrix, x ,y , x+2*scale_x , y , color);
-		DrawLine(matrix, x , y , x , y+2*scale_y , color);
-		DrawLine(matrix, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
-		DrawLine(matrix, x+2*scale_x , y+2*scale_y, x+2*scale_x , y+4*scale_y,color);
-		DrawLine(matrix,  x , y+4*scale_y , x+2*scale_x , y+4*scale_y,color);
+		DrawLine(offscreen, x ,y , x+2*scale_x , y , color);
+		DrawLine(offscreen, x , y , x , y+2*scale_y , color);
+		DrawLine(offscreen, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
+		DrawLine(offscreen, x+2*scale_x , y+2*scale_y, x+2*scale_x , y+4*scale_y,color);
+		DrawLine(offscreen,  x , y+4*scale_y , x+2*scale_x , y+4*scale_y,color);
 		break; 
 	case 6:
-		DrawLine(matrix, x ,y , x , y+(4*scale_y) , color);
-		DrawLine(matrix, x ,y , x+2*scale_x , y , color);
-		DrawLine(matrix, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
-		DrawLine(matrix, x+2*scale_x , y+2*scale_y, x+2*scale_x , y+4*scale_y,color);
-		DrawLine(matrix, x+2*scale_x , y+4*scale_y , x, y+(4*scale_y) , color);
+		DrawLine(offscreen, x ,y , x , y+(4*scale_y) , color);
+		DrawLine(offscreen, x ,y , x+2*scale_x , y , color);
+		DrawLine(offscreen, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
+		DrawLine(offscreen, x+2*scale_x , y+2*scale_y, x+2*scale_x , y+4*scale_y,color);
+		DrawLine(offscreen, x+2*scale_x , y+4*scale_y , x, y+(4*scale_y) , color);
 		break;
 	case 7:
-		DrawLine(matrix, x ,y , x+2*scale_x , y , color);
-		DrawLine(matrix,  x+2*scale_x, y, x+scale_x,y+(4*scale_y), color);
+		DrawLine(offscreen, x ,y , x+2*scale_x , y , color);
+		DrawLine(offscreen,  x+2*scale_x, y, x+scale_x,y+(4*scale_y), color);
 		break;
 	case 8:
-		DrawLine(matrix, x ,y , x , y+(4*scale_y) , color);
-		DrawLine(matrix, x , y+(4*scale_y) , x+(2*scale_x) , y+(4*scale_y), color);
-		DrawLine(matrix, x+(2*scale_x) , y , x+(2*scale_x) , y+(4*scale_y) , color);
-		DrawLine(matrix, x ,y , x+(2*scale_x) , y , color);
-		DrawLine(matrix, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
+		DrawLine(offscreen, x ,y , x , y+(4*scale_y) , color);
+		DrawLine(offscreen, x , y+(4*scale_y) , x+(2*scale_x) , y+(4*scale_y), color);
+		DrawLine(offscreen, x+(2*scale_x) , y , x+(2*scale_x) , y+(4*scale_y) , color);
+		DrawLine(offscreen, x ,y , x+(2*scale_x) , y , color);
+		DrawLine(offscreen, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
 		break;
 	case 9:
-		DrawLine(matrix, x ,y , x , y+(2*scale_y) , color);
-		DrawLine(matrix, x , y+(4*scale_y) , x+(2*scale_x) , y+(4*scale_y), color);
-		DrawLine(matrix, x+(2*scale_x) , y , x+(2*scale_x) , y+(4*scale_y) , color);
-		DrawLine(matrix, x ,y , x+(2*scale_x) , y , color);
-		DrawLine(matrix, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
+		DrawLine(offscreen, x ,y , x , y+(2*scale_y) , color);
+		DrawLine(offscreen, x , y+(4*scale_y) , x+(2*scale_x) , y+(4*scale_y), color);
+		DrawLine(offscreen, x+(2*scale_x) , y , x+(2*scale_x) , y+(4*scale_y) , color);
+		DrawLine(offscreen, x ,y , x+(2*scale_x) , y , color);
+		DrawLine(offscreen, x+2*scale_x , y+2*scale_y , x , y+2*scale_y, color);
 		break;    
 	}
 }
 
 void cls(){
-	matrix->Clear();
+	offscreen->Clear();
 }
 
 int pong_get_ball_endpoint(float tempballpos_x, float  tempballpos_y, float  tempballvel_x, float tempballvel_y) {
@@ -157,28 +163,29 @@ int pong_get_ball_endpoint(float tempballpos_x, float  tempballpos_y, float  tem
 }
 
 void pong(){
-	//matrix.setTextSize(1);
-	//matrix.setTextColor(Color(73, 73, 73));
-
 	float ballpos_x, ballpos_y;
 	float ballvel_x, ballvel_y;
 	int bat1_y = 5;  //bat starting y positions
 	int bat2_y = 5;  
 	int bat1_target_y = 5;  //bat targets for bats to move to
 	int bat2_target_y = 5;
-	int bat1_update = 1;  //flags - set to update bat position
-	int bat2_update = 1;
-	int bat1miss, bat2miss; //flags set on the minute or hour that trigger the bats to miss the ball, thus upping the score to match the time.
+	bool bat1_update = true;  //flags - set to update bat position
+	bool bat2_update = true;
+	bool bat1miss = false;
+	bool bat2miss = false; //flags set on the minute or hour that trigger the bats to miss the ball, thus upping the score to match the time.
 	int restart = 1;   //game restart flag - set to 1 initially to setup 1st game
-
-	cls();
+	
+	string time;
 	
 	while(true) {
+	    if (!bat2miss && !bat2miss)
+	    {
         std::time_t tt = system_clock::to_time_t(system_clock::now());
         struct std::tm *ptm = std::localtime(&tt);
         std::stringstream ss;
         ss << std::put_time(ptm, time_format);
-        string time = ss.str();
+        time = ss.str();
+        }
         
         int hours = charsToInt(time[0], time[1]);
         int mins = charsToInt(time[3], time[4]);
@@ -186,46 +193,31 @@ void pong(){
         
 		cls();
 		//draw pitch centre line
+		if (animNet)
+		{
 		int adjust = 0;
 		if(seconds%2==0)adjust=1;
 		for (int i = 0; i <16; i++) {
 			if ( i % 2 == 0 ) { //plot point if an even number
-				matrix->SetPixel(16,i+adjust,0,146,0);
+				offscreen->SetPixel(16,i+adjust,netColor.r,netColor.g,netColor.b);
 			}
 		} 
-
-		/*int ampm=0;
-		//update score / time
-		int mins = Time.minute();
-		int hours = Time.hour();
-		if (hours > 12) {
-			hours = hours - ampm * 12;
 		}
-		if (hours < 1) {
-			hours = hours + ampm * 12;
+		else
+		{
+		for (int i = 0; i <16; i++) {
+			offscreen->SetPixel(16,i,netColor.r,netColor.g,netColor.b);
 		}
+		}
+		
+		vectorNumber(time[0]-'0',8,1,scoreColor,1,1);
+		vectorNumber(time[1]-'0',12,1,scoreColor,1,1);
 
-		int buffer[3];
-
-		itoa(hours,buffer,10);
-		//fix - as otherwise if num has leading zero, e.g. "03" hours, itoa coverts this to ints with space "3 ". 
-		if (hours < 10) {
-			buffer[1] = buffer[0];
-			buffer[0] = '0';
-		}*/
-		vectorNumber(time[0]-'0',8,1,Color(36,36,36),1,1);
-		vectorNumber(time[1]-'0',12,1,Color(36,36,36),1,1);
-
-		/*itoa(mins,buffer,10); 
-		if (mins < 10) {
-			buffer[1] = buffer[0];
-			buffer[0] = '0';
-		} */
-		vectorNumber(time[3]-'0',18,1,Color(36,36,36),1,1);
-		vectorNumber(time[4]-'0',22,1,Color(36,36,36),1,1);
+		vectorNumber(time[3]-'0',18,1,scoreColor,1,1);
+		vectorNumber(time[4]-'0',22,1,scoreColor,1,1);
 
 		//if restart flag is 1, setup a new game
-		if (restart) {
+		if (restart > 0) {
 			//set ball start pos
 			ballpos_x = 16;
 			ballpos_y = random (4,12);
@@ -244,19 +236,21 @@ void pong(){
 				ballvel_y = -0.5;
 			}
 			//draw bats in initial positions
-			bat1miss = 0; 
-			bat2miss = 0;
+			bat1miss = false; 
+			bat2miss = false;
 			//reset game restart flag
-			restart = 0;
+			restart--;
+			
+			seconds = 0;
 		}
 
 		//if coming up to the minute: secs = 59 and mins < 59, flag bat 2 (right side) to miss the return so we inc the minutes score
 		if (seconds == 59 && mins < 59){
-			bat1miss = 1;
+			bat1miss = true;
 		}
 		// if coming up to the hour: secs = 59  and mins = 59, flag bat 1 (left side) to miss the return, so we inc the hours score.
 		if (seconds == 59 && mins == 59){
-			bat2miss = 1;
+			bat2miss = true;
 		}
 
 		//AI - we run 2 sets of 'AI' for each bat to work out where to go to hit the ball back 
@@ -277,8 +271,8 @@ void pong(){
 			int end_ball_y = pong_get_ball_endpoint(ballpos_x, ballpos_y, ballvel_x, ballvel_y);
 
 			//if the miss flag is set,  then the bat needs to miss the ball when it gets to end_ball_y
-			if (bat1miss == 1){
-				bat1miss = 0;
+			if (bat1miss){
+				//bat1miss = false;
 				if ( end_ball_y > 8){
 					bat1_target_y = random (0,3); 
 				} 
@@ -307,8 +301,8 @@ void pong(){
 			int end_ball_y = pong_get_ball_endpoint(ballpos_x, ballpos_y, ballvel_x, ballvel_y);
 
 			//if flag set to miss, move bat out way of ball
-			if (bat2miss == 1){
-				bat2miss = 0;
+			if (bat2miss){
+				//bat2miss = false;
 				//if ball end point above 8 then move bat down, else move it up- so either way it misses
 				if (end_ball_y > 8){
 					bat2_target_y = random (0,3); 
@@ -334,36 +328,36 @@ void pong(){
 		//if bat y greater than target y move down until hit 0 (dont go any further or bat will move off screen)
 		if (bat1_y > bat1_target_y && bat1_y > 0 ) {
 			bat1_y--;
-			bat1_update = 1;
+			bat1_update = true;
 		}
 
 		//if bat y less than target y move up until hit 10 (as bat is 6)
 		if (bat1_y < bat1_target_y && bat1_y < 10) {
 			bat1_y++;
-			bat1_update = 1;
+			bat1_update = true;
 		}
 
 		//draw bat 1
 		if (bat1_update){
-			fillRect(BAT1_X-1,bat1_y,2,6,Color(0,0,146));
+			fillRect(BAT1_X-1,bat1_y,2,6,paddleColor);
 		}
 
 		//move bat 2 towards target (dont go any further or bat will move off screen)
 		//if bat y greater than target y move down until hit 0
 		if (bat2_y > bat2_target_y && bat2_y > 0 ) {
 			bat2_y--;
-			bat2_update = 1;
+			bat2_update = true;
 		}
 
 		//if bat y less than target y move up until hit max of 10 (as bat is 6)
 		if (bat2_y < bat2_target_y && bat2_y < 10) {
 			bat2_y++;
-			bat2_update = 1;
+			bat2_update = true;
 		}
 
 		//draw bat2
 		if (bat2_update){
-			fillRect(BAT2_X+1,bat2_y,2,6,Color(0,0,146));
+			fillRect(BAT2_X+1,bat2_y,2,6,paddleColor);
 		}
 
 		//update the ball position using the velocity
@@ -383,14 +377,15 @@ void pong(){
 
 		//check for ball collision with bat1. check ballx is same as batx
 		//and also check if bally lies within width of bat i.e. baty to baty + 6. We can use the exp if(a < b && b < c) 
-		if ((int)ballpos_x == BAT1_X+1 && (bat1_y <= (int)ballpos_y && (int)ballpos_y <= bat1_y + 5) ) { 
+		//if ((int)ballpos_x == BAT1_X+1 && (bat1_y <= (int)ballpos_y && (int)ballpos_y <= bat1_y + 5) ) { 
+		if ((int)ballpos_x <= BAT1_X+1 && !bat1miss) { 
 
 			//random if bat flicks ball to return it - and therefor changes ball velocity
 			if(!random(0,3)) { //not true = no flick - just straight rebound and no change to ball y vel
 				ballvel_x = ballvel_x * -1;
 			} 
 			else {
-				bat1_update = 1;
+				bat1_update = true;
 				int flick;  //0 = up, 1 = down.
 
 				if (bat1_y > 1 || bat1_y < 8){
@@ -430,14 +425,15 @@ void pong(){
 
 		//check for ball collision with bat2. check ballx is same as batx
 		//and also check if bally lies within width of bat i.e. baty to baty + 6. We can use the exp if(a < b && b < c) 
-		if ((int)ballpos_x == BAT2_X && (bat2_y <= (int)ballpos_y && (int)ballpos_y <= bat2_y + 5) ) { 
+		//if ((int)ballpos_x == BAT2_X && (bat2_y <= (int)ballpos_y && (int)ballpos_y <= bat2_y + 5) ) { 
+		if ((int)ballpos_x >= BAT2_X && !bat2miss) { 
 
 			//random if bat flicks ball to return it - and therefor changes ball velocity
 			if(!random(0,3)) {
 				ballvel_x = ballvel_x * -1;    //not true = no flick - just straight rebound and no change to ball y vel
 			} 
 			else {
-				bat1_update = 1;
+				bat2_update = true;
 				int flick;  //0 = up, 1 = down.
 
 				if (bat2_y > 1 || bat2_y < 8){
@@ -478,15 +474,16 @@ void pong(){
 		int plot_x = (int)(ballpos_x + 0.5f);
 		int plot_y = (int)(ballpos_y + 0.5f);
 
-		matrix->SetPixel(plot_x,plot_y,146, 0, 0);
+        if (restart == 0)
+		offscreen->SetPixel(plot_x,plot_y,ballColor.r,ballColor.g,ballColor.b);
 
 		//check if a bat missed the ball. if it did, reset the game.
-		if ((int)ballpos_x == 0 ||(int) ballpos_x == 32){
-			restart = 1; 
+		if ((int)ballpos_x < 0 ||(int) ballpos_x > 31){
+			restart = 25; 
 		}
 		
 		usleep(40000);
-		//matrix.swapBuffers(false);
+        matrix->SwapOnVSync(offscreen);
 	} 
 }
 
@@ -500,13 +497,22 @@ static void InterruptHandler(int signo) {
 
 static int usage(const char *progname, RGBMatrix::Options &matrix_options, rgb_matrix::RuntimeOptions &runtime_opt) {
   fprintf(stderr, "usage: %s [options]\n", progname);
-  fprintf(stderr, "Displays the time using a morphing 7 segment display.\n");
+  fprintf(stderr, "Displays the time using a game of Pong.\n");
   fprintf(stderr, "Options:\n");
   rgb_matrix::PrintMatrixFlags(stderr, matrix_options, runtime_opt);
   fprintf(stderr,
           "\t-t                : Use 24-hour clock.\n"
+          "\t-a                : Don't animate the net.\n"
+          "\t-p <r,g,b>        : Paddle color. Default 0,0,146\n"
+          "\t-n <r,g,b>        : Net color. Default 0,146,0\n"
+          "\t-s <r,g,b>        : Score color. Default 36,36,36\n"
+          "\t-b <r,g,b>        : Ball color. Default 146,0,0\n"
           );
   return 1;
+}
+
+static bool parseColor(Color *c, const char *str) {
+  return sscanf(str, "%hhu,%hhu,%hhu", &c->r, &c->g, &c->b) == 3;
 }
 
 int main(int argc, char *argv[]) {
@@ -518,10 +524,37 @@ int main(int argc, char *argv[]) {
   }
 
   int opt;
-  while ((opt = getopt(argc, argv, "t")) != -1) {
+  while ((opt = getopt(argc, argv, "tap:n:s:b:")) != -1) {
     switch (opt) {
       case 't':
         time_format = "%H:%M:%S";
+        break;
+      case 'a':
+        animNet = false;
+        break;
+      case 'p':
+        if (!parseColor(&paddleColor, optarg)) {
+          fprintf(stderr, "Invalid color spec: %s\n", optarg);
+          return usage(argv[0], matrix_options, runtime_opt);
+        }
+        break;
+      case 'n':
+        if (!parseColor(&netColor, optarg)) {
+          fprintf(stderr, "Invalid color spec: %s\n", optarg);
+          return usage(argv[0], matrix_options, runtime_opt);
+        }
+        break;
+      case 's':
+        if (!parseColor(&scoreColor, optarg)) {
+          fprintf(stderr, "Invalid color spec: %s\n", optarg);
+          return usage(argv[0], matrix_options, runtime_opt);
+        }
+        break;
+      case 'b':
+        if (!parseColor(&ballColor, optarg)) {
+          fprintf(stderr, "Invalid color spec: %s\n", optarg);
+          return usage(argv[0], matrix_options, runtime_opt);
+        }
         break;
       default:
         return usage(argv[0], matrix_options, runtime_opt);
@@ -538,6 +571,8 @@ int main(int argc, char *argv[]) {
   signal(SIGINT, InterruptHandler);
 
   printf("Press <CTRL-C> to exit and reset LEDs\n");
+    
+  offscreen = matrix->CreateFrameCanvas();
 
   pong();
   return 0;
