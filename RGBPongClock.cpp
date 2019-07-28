@@ -39,10 +39,14 @@ using std::chrono::system_clock;
 
 char *time_format = "%I:%M:%S";
 bool animNet = true;
-Color paddleColor = Color(0, 0, 146);
+/*Color paddleColor = Color(0, 0, 146);
 Color netColor = Color(0, 146, 0);
 Color scoreColor = Color(36, 36, 36);
-Color ballColor = Color(146, 0, 0);
+Color ballColor = Color(146, 0, 0);*/
+Color paddleColor = Color(0, 0, 255);
+Color netColor = Color(0, 255, 0);
+Color scoreColor = Color(63, 63, 63);
+Color ballColor = Color(255, 0, 0);
   
 RGBMatrix *matrix;
 FrameCanvas *offscreen;
@@ -151,7 +155,7 @@ void cls(){
 int pong_get_ball_endpoint(float tempballpos_x, float  tempballpos_y, float  tempballvel_x, float tempballvel_y) {
 
 	//run prediction until ball hits bat
-	while (tempballpos_x > BAT1_X && tempballpos_x < BAT2_X  ){
+	while (tempballpos_x > BAT1_X+1 && tempballpos_x < BAT2_X  ){
 		tempballpos_x = tempballpos_x + tempballvel_x;
 		tempballpos_y = tempballpos_y + tempballvel_y;
 		//check for collisions with top / bottom
@@ -174,11 +178,13 @@ void pong(){
 	bool bat1miss = false;
 	bool bat2miss = false; //flags set on the minute or hour that trigger the bats to miss the ball, thus upping the score to match the time.
 	int restart = 1;   //game restart flag - set to 1 initially to setup 1st game
+	bool holdTime = false;
 	
 	string time;
 	
 	while(true) {
-	    if (!bat2miss && !bat2miss)
+	    //if (!bat2miss && !bat2miss)
+	    if (!holdTime)
 	    {
         std::time_t tt = system_clock::to_time_t(system_clock::now());
         struct std::tm *ptm = std::localtime(&tt);
@@ -238,19 +244,23 @@ void pong(){
 			//draw bats in initial positions
 			bat1miss = false; 
 			bat2miss = false;
+			holdTime = false;
 			//reset game restart flag
 			restart--;
 			
-			seconds = 0;
+			//if (restart == 0)
+			  //seconds = 0;
 		}
-
+		
 		//if coming up to the minute: secs = 59 and mins < 59, flag bat 2 (right side) to miss the return so we inc the minutes score
 		if (seconds == 59 && mins < 59){
 			bat1miss = true;
+			holdTime = true;
 		}
 		// if coming up to the hour: secs = 59  and mins = 59, flag bat 1 (left side) to miss the return, so we inc the hours score.
 		if (seconds == 59 && mins == 59){
 			bat2miss = true;
+			holdTime = true;
 		}
 
 		//AI - we run 2 sets of 'AI' for each bat to work out where to go to hit the ball back 
@@ -264,15 +274,15 @@ void pong(){
 		if (ballpos_x == random(4,16)){
 			bat2_target_y = ballpos_y;
 		}
-
+		
 		//when the ball is closer to the left bat, run the ball maths to find out where the ball will land
 		if (ballpos_x == 15 && ballvel_x < 0) {
 
 			int end_ball_y = pong_get_ball_endpoint(ballpos_x, ballpos_y, ballvel_x, ballvel_y);
-
+			
 			//if the miss flag is set,  then the bat needs to miss the ball when it gets to end_ball_y
 			if (bat1miss){
-				//bat1miss = false;
+				bat1miss = false;
 				if ( end_ball_y > 8){
 					bat1_target_y = random (0,3); 
 				} 
@@ -302,7 +312,7 @@ void pong(){
 
 			//if flag set to miss, move bat out way of ball
 			if (bat2miss){
-				//bat2miss = false;
+				bat2miss = false;
 				//if ball end point above 8 then move bat down, else move it up- so either way it misses
 				if (end_ball_y > 8){
 					bat2_target_y = random (0,3); 
@@ -377,8 +387,8 @@ void pong(){
 
 		//check for ball collision with bat1. check ballx is same as batx
 		//and also check if bally lies within width of bat i.e. baty to baty + 6. We can use the exp if(a < b && b < c) 
-		//if ((int)ballpos_x == BAT1_X+1 && (bat1_y <= (int)ballpos_y && (int)ballpos_y <= bat1_y + 5) ) { 
-		if ((int)ballpos_x <= BAT1_X+1 && !bat1miss) { 
+		if ((int)ballpos_x == BAT1_X+1 && (bat1_y <= (int)ballpos_y && (int)ballpos_y <= bat1_y + 5) ) { 
+		//if ((int)ballpos_x <= BAT1_X+1 && !bat1miss) { 
 
 			//random if bat flicks ball to return it - and therefor changes ball velocity
 			if(!random(0,3)) { //not true = no flick - just straight rebound and no change to ball y vel
@@ -425,8 +435,8 @@ void pong(){
 
 		//check for ball collision with bat2. check ballx is same as batx
 		//and also check if bally lies within width of bat i.e. baty to baty + 6. We can use the exp if(a < b && b < c) 
-		//if ((int)ballpos_x == BAT2_X && (bat2_y <= (int)ballpos_y && (int)ballpos_y <= bat2_y + 5) ) { 
-		if ((int)ballpos_x >= BAT2_X && !bat2miss) { 
+		if ((int)ballpos_x == BAT2_X && (bat2_y <= (int)ballpos_y && (int)ballpos_y <= bat2_y + 5) ) { 
+		//if ((int)ballpos_x >= BAT2_X && !bat2miss) { 
 
 			//random if bat flicks ball to return it - and therefor changes ball velocity
 			if(!random(0,3)) {
@@ -479,7 +489,8 @@ void pong(){
 
 		//check if a bat missed the ball. if it did, reset the game.
 		if ((int)ballpos_x < 0 ||(int) ballpos_x > 31){
-			restart = 25; 
+			restart = 30;
+			holdTime = false;
 		}
 		
 		usleep(40000);
@@ -503,10 +514,10 @@ static int usage(const char *progname, RGBMatrix::Options &matrix_options, rgb_m
   fprintf(stderr,
           "\t-t                : Use 24-hour clock.\n"
           "\t-a                : Don't animate the net.\n"
-          "\t-p <r,g,b>        : Paddle color. Default 0,0,146\n"
-          "\t-n <r,g,b>        : Net color. Default 0,146,0\n"
-          "\t-s <r,g,b>        : Score color. Default 36,36,36\n"
-          "\t-b <r,g,b>        : Ball color. Default 146,0,0\n"
+          "\t-p <r,g,b>        : Paddle color. Default 0,0,255\n"
+          "\t-n <r,g,b>        : Net color. Default 0,255,0\n"
+          "\t-s <r,g,b>        : Score color. Default 63,63,63\n"
+          "\t-b <r,g,b>        : Ball color. Default 255,0,0\n"
           );
   return 1;
 }
@@ -518,6 +529,7 @@ static bool parseColor(Color *c, const char *str) {
 int main(int argc, char *argv[]) {
   RGBMatrix::Options matrix_options;
   matrix_options.rows = 16;
+  matrix_options.brightness = 50;
   rgb_matrix::RuntimeOptions runtime_opt;
   if (!rgb_matrix::ParseOptionsFromFlags(&argc, &argv, &matrix_options, &runtime_opt)) {
     return usage(argv[0], matrix_options, runtime_opt);
