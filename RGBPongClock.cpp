@@ -173,7 +173,8 @@ void pong(){
 	string time;
 	
 	while(true) {
-        std::time_t tt = system_clock::to_time_t(system_clock::now());
+	    std::chrono::seconds one_sec(1);
+        std::time_t tt = system_clock::to_time_t(system_clock::now() + one_sec);
         struct std::tm *ptm = std::localtime(&tt);
 	    if (!holdTime)
 	    {
@@ -213,8 +214,9 @@ void pong(){
 
 		//if restart flag is 1, setup a new game
 		if (restart > 0) {
-			//set ball start pos
 			ballpos_x = 16;
+		    if (restart == 1) {
+			//set ball start pos
 			ballpos_y = random (4,12);
 
 			//pick random ball direction
@@ -230,26 +232,31 @@ void pong(){
 			else {
 				ballvel_y = -0.5;
 			}
+			}
 			//draw bats in initial positions
 			bat1miss = false; 
 			bat2miss = false;
 			holdTime = false;
 			//reset game restart flag
 			restart--;
-			
-			//if (restart == 0)
-			  //seconds = 0;
 		}
 		
 		//if coming up to the minute: secs = 59 and mins < 59, flag bat 2 (right side) to miss the return so we inc the minutes score
 		if (seconds == 59 && mins < 59){
-			bat1miss = true;
 			holdTime = true;
 		}
 		// if coming up to the hour: secs = 59  and mins = 59, flag bat 1 (left side) to miss the return, so we inc the hours score.
 		if (seconds == 59 && mins == 59){
-			bat2miss = true;
 			holdTime = true;
+		}
+		
+		//if coming up to the minute: secs = 59 and mins < 59, flag bat 2 (right side) to miss the return so we inc the minutes score
+		if (seconds == 0 && mins > 0){
+			bat1miss = true;
+		}
+		// if coming up to the hour: secs = 59  and mins = 59, flag bat 1 (left side) to miss the return, so we inc the hours score.
+		if (seconds == 0 && mins == 0){
+			bat2miss = true;
 		}
 
 		//AI - we run 2 sets of 'AI' for each bat to work out where to go to hit the ball back 
@@ -478,7 +485,7 @@ void pong(){
 
 		//check if a bat missed the ball. if it did, reset the game.
 		if ((int)ballpos_x < 0 ||(int) ballpos_x > 31){
-			restart = 30;
+			restart = 25;
 			holdTime = false;
 		}
 		
