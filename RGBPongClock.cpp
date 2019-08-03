@@ -58,16 +58,6 @@ int random(int start, int end) {
   return distribution(generator);
 }
 
-int charToInt(char input)
-{
-	return input - '0';
-}
-
-int charsToInt(char tens, char ones)
-{
-	return charToInt(tens) * 10 + charToInt(ones);
-}
-
 void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, Color color)
 {
   for (int16_t x_pos = x; x_pos < x + w; x_pos++)
@@ -183,37 +173,36 @@ void pong(){
 	string time;
 	
 	while(true) {
-	    //if (!bat2miss && !bat2miss)
-	    if (!holdTime)
-	    {
         std::time_t tt = system_clock::to_time_t(system_clock::now());
         struct std::tm *ptm = std::localtime(&tt);
-        std::stringstream ss;
-        ss << std::put_time(ptm, time_format);
-        time = ss.str();
+	    if (!holdTime)
+	    {
+            std::stringstream ss;
+            ss << std::put_time(ptm, time_format);
+            time = ss.str();
         }
         
-        int hours = charsToInt(time[0], time[1]);
-        int mins = charsToInt(time[3], time[4]);
-        int seconds = charsToInt(time[6], time[7]);
+        int hours = ptm->tm_hour;
+        int mins = ptm->tm_min;
+        int seconds = ptm->tm_sec;
         
 		cls();
 		//draw pitch centre line
 		if (animNet)
 		{
-		int adjust = 0;
-		if(seconds%2==0)adjust=1;
-		for (int i = 0; i <16; i++) {
-			if ( i % 2 == 0 ) { //plot point if an even number
-				offscreen->SetPixel(16,i+adjust,netColor.r,netColor.g,netColor.b);
-			}
-		} 
+		    int adjust = 0;
+		    if(seconds%2==0)adjust=1;
+		    for (int i = 0; i <16; i++) {
+			    if ( i % 2 == 0 ) { //plot point if an even number
+				    offscreen->SetPixel(16,i+adjust,netColor.r,netColor.g,netColor.b);
+			    }
+		    } 
 		}
 		else
 		{
-		for (int i = 0; i <16; i++) {
-			offscreen->SetPixel(16,i,netColor.r,netColor.g,netColor.b);
-		}
+		    for (int i = 0; i <16; i++) {
+			    offscreen->SetPixel(16,i,netColor.r,netColor.g,netColor.b);
+		    }
 		}
 		
 		vectorNumber(time[0]-'0',8,1,scoreColor,1,1);
