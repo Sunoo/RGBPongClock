@@ -142,7 +142,7 @@ void cls(){
 	offscreen->Clear();
 }
 
-int pong_get_ball_endpoint(float tempballpos_x, float  tempballpos_y, float  tempballvel_x, float tempballvel_y) {
+int pong_get_ball_endpoint(int tempballpos_x, float  tempballpos_y, int  tempballvel_x, float tempballvel_y) {
 
 	//run prediction until ball hits bat
 	while (tempballpos_x > BAT1_X+1 && tempballpos_x < BAT2_X  ){
@@ -157,8 +157,10 @@ int pong_get_ball_endpoint(float tempballpos_x, float  tempballpos_y, float  tem
 }
 
 void pong(){
-	float ballpos_x, ballpos_y;
-	float ballvel_x, ballvel_y;
+	int ballpos_x = 16;
+	float ballpos_y = 8;
+	int ballvel_x = 0;
+	float ballvel_y = 0;
 	int bat1_y = 5;  //bat starting y positions
 	int bat2_y = 5;  
 	int bat1_target_y = 5;  //bat targets for bats to move to
@@ -183,7 +185,7 @@ void pong(){
             time = ss.str();
         }
         
-        int hours = ptm->tm_hour;
+        //int hours = ptm->tm_hour;
         int mins = ptm->tm_min;
         int seconds = ptm->tm_sec;
         
@@ -216,22 +218,22 @@ void pong(){
 		if (restart > 0) {
 			ballpos_x = 16;
 		    if (restart == 1) {
-			//set ball start pos
-			ballpos_y = random (4,12);
+			    //set ball start pos
+			    ballpos_y = random (4,12);
 
-			//pick random ball direction
-			if (random(0,2) > 0) {
-				ballvel_x = 1; 
-			} 
-			else {
-				ballvel_x = -1;
-			}
-			if (random(0,2) > 0) {
-				ballvel_y = 0.5; 
-			} 
-			else {
-				ballvel_y = -0.5;
-			}
+			    //pick random ball direction
+			    if (random(0,2) > 0) {
+				    ballvel_x = 1; 
+			    } 
+			    else {
+				    ballvel_x = -1;
+			    }
+			    if (random(0,2) > 0) {
+				    ballvel_y = 0.5; 
+			    } 
+			    else {
+				    ballvel_y = -0.5;
+			    }
 			}
 			//draw bats in initial positions
 			bat1miss = false; 
@@ -241,22 +243,19 @@ void pong(){
 			restart--;
 		}
 		
-		//if coming up to the minute: secs = 59 and mins < 59, flag bat 2 (right side) to miss the return so we inc the minutes score
-		if (seconds == 59 && mins < 59){
-			holdTime = true;
-		}
-		// if coming up to the hour: secs = 59  and mins = 59, flag bat 1 (left side) to miss the return, so we inc the hours score.
-		if (seconds == 59 && mins == 59){
+		if (seconds == 59){
 			holdTime = true;
 		}
 		
-		//if coming up to the minute: secs = 59 and mins < 59, flag bat 2 (right side) to miss the return so we inc the minutes score
-		if (seconds == 0 && mins > 0){
-			bat1miss = true;
-		}
-		// if coming up to the hour: secs = 59  and mins = 59, flag bat 1 (left side) to miss the return, so we inc the hours score.
-		if (seconds == 0 && mins == 0){
-			bat2miss = true;
+		if (seconds == 0){
+		    //if coming up to the minute: secs = 59 and mins < 59, flag bat 2 (right side) to miss the return so we inc the minutes score
+		    if (mins > 0){
+			    bat1miss = true;
+			}
+		    // if coming up to the hour: secs = 59  and mins = 59, flag bat 1 (left side) to miss the return, so we inc the hours score.
+		    else{
+			    bat2miss = true;
+		    }
 		}
 
 		//AI - we run 2 sets of 'AI' for each bat to work out where to go to hit the ball back 
@@ -288,7 +287,7 @@ void pong(){
 			} 
 			//if the miss flag isn't set,  set bat target to ball end point with some randomness so its not always hitting top of bat
 			else {
-				bat1_target_y = end_ball_y - random (0, 6);        
+				bat1_target_y = end_ball_y - random (1, 5);        
 				//check not less than 0
 				if (bat1_target_y < 0){
 					bat1_target_y = 0;
@@ -319,7 +318,7 @@ void pong(){
 			} 
 			else {
 				//set bat target to ball end point with some randomness 
-				bat2_target_y =  end_ball_y - random (0,6);
+				bat2_target_y =  end_ball_y - random (1,5);
 				//ensure target between 0 and 15
 				if (bat2_target_y < 0){
 					bat2_target_y = 0;
@@ -475,13 +474,14 @@ void pong(){
 				}
 			}
 		}
+		
+        if (restart == 0) {
+		    //plot the ball on the screen
+		    int plot_x = (int)(ballpos_x + 0.5f);
+		    int plot_y = (int)(ballpos_y + 0.5f);
 
-		//plot the ball on the screen
-		int plot_x = (int)(ballpos_x + 0.5f);
-		int plot_y = (int)(ballpos_y + 0.5f);
-
-        if (restart == 0)
-		offscreen->SetPixel(plot_x,plot_y,ballColor.r,ballColor.g,ballColor.b);
+		    offscreen->SetPixel(plot_x,plot_y,ballColor.r,ballColor.g,ballColor.b);
+		}
 
 		//check if a bat missed the ball. if it did, reset the game.
 		if ((int)ballpos_x < 0 ||(int) ballpos_x > 31){
