@@ -47,6 +47,7 @@ Color paddleColor = Color(0, 0, 255);
 Color netColor = Color(0, 255, 0);
 Color scoreColor = Color(63, 63, 63);
 Color ballColor = Color(255, 0, 0);
+int animSpeed = 40000;
   
 RGBMatrix *matrix;
 FrameCanvas *offscreen;
@@ -489,7 +490,7 @@ void pong(){
 			holdTime = false;
 		}
 		
-		usleep(40000);
+		usleep(animSpeed);
         matrix->SwapOnVSync(offscreen);
 	} 
 }
@@ -512,8 +513,9 @@ static int usage(const char *progname, RGBMatrix::Options &matrix_options, rgb_m
           "\t-a                : Don't animate the net.\n"
           "\t-p <r,g,b>        : Paddle color. Default 0,0,255\n"
           "\t-n <r,g,b>        : Net color. Default 0,255,0\n"
-          "\t-s <r,g,b>        : Score color. Default 63,63,63\n"
+          "\t-c <r,g,b>        : Score color. Default 63,63,63\n"
           "\t-b <r,g,b>        : Ball color. Default 255,0,0\n"
+          "\t-s <animSpeed>    : Microseconds between animation frames. Default: 40000\n"
           );
   return 1;
 }
@@ -532,7 +534,7 @@ int main(int argc, char *argv[]) {
   }
 
   int opt;
-  while ((opt = getopt(argc, argv, "tap:n:s:b:")) != -1) {
+  while ((opt = getopt(argc, argv, "tap:n:c:b:s:")) != -1) {
     switch (opt) {
       case 't':
         time_format = "%H:%M:%S";
@@ -552,7 +554,7 @@ int main(int argc, char *argv[]) {
           return usage(argv[0], matrix_options, runtime_opt);
         }
         break;
-      case 's':
+      case 'c':
         if (!parseColor(&scoreColor, optarg)) {
           fprintf(stderr, "Invalid color spec: %s\n", optarg);
           return usage(argv[0], matrix_options, runtime_opt);
@@ -563,6 +565,9 @@ int main(int argc, char *argv[]) {
           fprintf(stderr, "Invalid color spec: %s\n", optarg);
           return usage(argv[0], matrix_options, runtime_opt);
         }
+        break;
+      case 's':
+        animSpeed = atoi(optarg);
         break;
       default:
         return usage(argv[0], matrix_options, runtime_opt);
